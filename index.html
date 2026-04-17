@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة القاعات - الأكاديمية العربية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+        <div class="login-wrapper">
+            <div class="glass-panel login-panel">
+                <div class="login-header">
+                    <div class="logo-circle">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <h2>الأكاديمية العربية</h2>
+                    <p>نظام إدارة وحجز القاعات والمدرجات</p>
+                </div>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label>الرقم الوظيفي</label>
+                        <div class="input-icon">
+                            <i class="fa-regular fa-id-badge"></i>
+                            <input type="text" id="login-id" required placeholder="أدخل رقمك الوظيفي">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>كلمة المرور</label>
+                        <div class="input-icon">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="login-pass" required placeholder="أدخل كلمة المرور">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">تسجيل الدخول</button>
+                    <div id="login-error" class="error-text"></div>
+                </form>
+                <div class="login-hints">
+                    <p>أرقام تجريبية:</p>
+                    <small>مسئول: 100 (admin)، مدير: 200 (mngr)، موظف: 300 (emp)، سكرتير: 400 (sec)</small>
+                </div>
+            </div>
+            <div class="background-decorations">
+                <div class="blob blob-1"></div>
+                <div class="blob blob-2"></div>
+                <div class="blob blob-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div id="app-screen" class="screen">
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <div class="logo-small"><i class="fa-solid fa-building-columns"></i></div>
+                <h3>إدارة القاعات</h3>
+            </div>
+            <div class="user-info">
+                <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
+                <div>
+                    <h4 id="current-user-name">الاسم</h4>
+                    <span class="role-badge" id="current-user-role">الدور</span>
+                </div>
+            </div>
+            <nav class="nav-menu" id="main-nav">
+                <!-- Navigation inserted by JS based on role -->
+            </nav>
+            <button id="logout-btn" class="btn-outline mt-auto"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header glass-panel">
+                <h1 id="page-title">لوحة التحكم</h1>
+                <div class="header-actions">
+                    <div class="notification-wrapper">
+                        <button class="icon-btn" id="notif-btn">
+                            <i class="fa-regular fa-bell"></i>
+                            <span class="pulse-badge" id="notif-count">0</span>
+                        </button>
+                        <div class="notif-dropdown glass-panel hidden" id="notif-dropdown">
+                            <h4>الإشعارات</h4>
+                            <div class="notif-list" id="notif-list">
+                                <!-- Notifications here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-body" id="content-area">
+                <!-- Dynamic Content Loads Here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals & Templates -->
+    
+    <!-- Action/Provide Reason Modal -->
+    <div id="action-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h3 id="action-modal-title">اتخاذ إجراء</h3>
+            <div class="input-group">
+                <label>سبب الرفض (إلزامي للرفض)</label>
+                <textarea id="action-reason" rows="3" placeholder="اكتب السبب..."></textarea>
+            </div>
+            <div class="input-group">
+                <label>اقتراح بدائل (اختياري)</label>
+                <textarea id="action-suggestion" rows="2" placeholder="اقتراح قاعة أو موعد بديل..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-outline" onclick="closeModal('action-modal')">إلغاء</button>
+                <button class="btn-danger" id="confirm-reject-btn">تأكيد الرفض</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
