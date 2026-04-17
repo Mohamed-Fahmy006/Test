@@ -3,11 +3,15 @@ const sqlite3Verbose = sqlite3.verbose();
 import path from 'path';
 import bcrypt from 'bcrypt';
 import { fileURLToPath } from 'url';
+import process from 'process'; // Explicit import to fix 'process is not defined'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = process.env.VERCEL ? '/tmp/booking_system.db' : path.resolve(__dirname, 'booking_system.db');
+// Fallback for process.env if it's somehow missing in certain environments
+const env = process.env || {};
+
+const dbPath = env.VERCEL ? '/tmp/booking_system.db' : path.resolve(__dirname, 'booking_system.db');
 console.log('Database Path:', dbPath);
 const db = new sqlite3Verbose.Database(dbPath);
 
