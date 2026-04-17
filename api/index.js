@@ -5,12 +5,17 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { parseISO, differenceInHours, startOfDay, isBefore } = require('date-fns');
 
-const db = require('./database');
+const { db, initDb } = require('./database');
 const { authenticate, authorize, JWT_SECRET } = require('./middleware/auth');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.use(async (req, res, next) => {
+    await initDb();
+    next();
+});
 
 // 1. Authentication API
 app.post('/api/auth/login', (req, res) => {
