@@ -3,6 +3,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 
 const dbPath = process.env.VERCEL ? '/tmp/booking_system.db' : path.resolve(__dirname, 'booking_system.db');
+console.log('Database Path:', dbPath);
 const db = new sqlite3.Database(dbPath);
 
 const runObj = (sql, params = []) => new Promise((resolve, reject) => {
@@ -26,15 +27,15 @@ const doInit = async () => {
     for (const role of roles) await runObj(`INSERT OR IGNORE INTO Roles (Role_Name) VALUES (?)`, [role]);
 
     const adminHash = await bcrypt.hash('admin123', 10);
-    await runObj(`INSERT OR IGNORE INTO Users (User_ID, Full_Name, Password_Hash, Role_ID, View_Available_Override) VALUES (?, ?, ?, 1, ?)`, [100, 'System Admin', adminHash, 1]);
-
     const mngrHash = await bcrypt.hash('mngr', 10);
     const empHash = await bcrypt.hash('emp', 10);
     const secHash = await bcrypt.hash('sec', 10);
 
-    await runObj(`INSERT OR IGNORE INTO Users (User_ID, Full_Name, Password_Hash, Role_ID) VALUES (200, 'Branch Manager', ?, 2)`, [mngrHash]);
-    await runObj(`INSERT OR IGNORE INTO Users (User_ID, Full_Name, Password_Hash, Role_ID) VALUES (300, 'Employee', ?, 3)`, [empHash]);
-    await runObj(`INSERT OR IGNORE INTO Users (User_ID, Full_Name, Password_Hash, Role_ID) VALUES (400, 'College Secretary', ?, 4)`, [secHash]);
+    // Use INSERT OR REPLACE to ensure default passwords are reset if needed
+    await runObj(`INSERT OR REPLACE INTO Users (User_ID, Full_Name, Password_Hash, Role_ID, View_Available_Override) VALUES (?, ?, ?, 1, ?)`, [100, 'System Admin', adminHash, 1]);
+    await runObj(`INSERT OR REPLACE INTO Users (User_ID, Full_Name, Password_Hash, Role_ID) VALUES (200, 'Branch Manager', ?, 2)`, [mngrHash]);
+    await runObj(`INSERT OR REPLACE INTO Users (User_ID, Full_Name, Password_Hash, Role_ID) VALUES (300, 'Employee', ?, 3)`, [empHash]);
+    await runObj(`INSERT OR REPLACE INTO Users (User_ID, Full_Name, Password_Hash, Role_ID) VALUES (400, 'College Secretary', ?, 4)`, [secHash]);
 
     await runObj(`INSERT OR IGNORE INTO Rooms (Room_ID, Room_Name, Room_Type, Capacity) VALUES (1, 'Hall A', 'Lecture Hall', 150)`);
     await runObj(`INSERT OR IGNORE INTO Rooms (Room_ID, Room_Name, Room_Type, Capacity) VALUES (2, 'Hall B', 'Lecture Hall', 100)`);

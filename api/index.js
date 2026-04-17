@@ -20,13 +20,25 @@ app.use(async (req, res, next) => {
 // 1. Authentication API
 app.post('/api/auth/login', (req, res) => {
     const { employee_id, password } = req.body;
+    console.log(`Login attempt: ID=${employee_id}`);
+    
     db.get(`SELECT u.*, r.Role_Name FROM Users u JOIN Roles r ON u.Role_ID = r.Role_ID WHERE u.User_ID = ?`, [employee_id], async (err, user) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
-        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+        if (err) {
+            console.error('DB Login Error:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        if (!user) {
+            console.log(`User not found: ID=${employee_id}`);
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
 
         const isMatch = await bcrypt.compare(password, user.Password_Hash);
-        if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+        if (!isMatch) {
+            console.log(`Password mismatch for ID=${employee_id}`);
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
 
+        console.log(`Login successful for user: ${user.Full_Name}`);
         const token = jwt.sign(
             { userId: user.User_ID, role: user.Role_Name, override: user.View_Available_Override },
             JWT_SECRET,
