@@ -1,10 +1,15 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-const bcrypt = require('bcrypt');
+import sqlite3 from 'sqlite3';
+const sqlite3Verbose = sqlite3.verbose();
+import path from 'path';
+import bcrypt from 'bcrypt';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const dbPath = process.env.VERCEL ? '/tmp/booking_system.db' : path.resolve(__dirname, 'booking_system.db');
 console.log('Database Path:', dbPath);
-const db = new sqlite3.Database(dbPath);
+const db = new sqlite3Verbose.Database(dbPath);
 
 const runObj = (sql, params = []) => new Promise((resolve, reject) => {
     db.run(sql, params, function(err) { 
@@ -48,11 +53,11 @@ const doInit = async () => {
     await runObj(`INSERT OR IGNORE INTO Time_Slots (Slot_ID, Start_Time, End_Time) VALUES (4, '14:00', '16:00')`);
 };
 
-const initDb = async () => {
+export const initDb = async () => {
     if (initialized) return db;
     if (!initPromise) initPromise = doInit().then(() => { initialized = true; });
     await initPromise;
     return db;
 };
 
-module.exports = { db, initDb };
+export { db };

@@ -1,12 +1,12 @@
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { parseISO, differenceInHours, startOfDay, isBefore } = require('date-fns');
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { parseISO, differenceInHours, isBefore } from 'date-fns';
 
-const { db, initDb } = require('./database');
-const { authenticate, authorize, JWT_SECRET } = require('./middleware/auth');
+import { db, initDb } from './database.js';
+import { authenticate, authorize, JWT_SECRET } from './middleware/auth.js';
 
 const app = express();
 app.use(cors());
@@ -146,7 +146,7 @@ app.get('/api/admin/calendar-view', authenticate, authorize(['Admin']), (req, re
             JOIN Time_Slots t ON b.Slot_ID = t.Slot_ID
             JOIN Users u ON b.User_ID = u.User_ID`, (err, rows) => {
         if (err) return res.status(500).json({ error: 'Database error' });
-        res.json(rows); // Frontend maps Booking_Type/Room_Type to colors (Blue, Green, Yellow)
+        res.json(rows);
     });
 });
 
@@ -194,10 +194,9 @@ app.get('/api/metadata', authenticate, (req, res) => {
     });
 });
 
-if (process.env.VERCEL) {
-    module.exports = app;
-} else {
-    // Local dev / Traditional hosting fallback
+export default app;
+
+if (!process.env.VERCEL) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);

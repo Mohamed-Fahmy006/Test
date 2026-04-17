@@ -1,10 +1,10 @@
-const jwt = require('jsonwebtoken');
-const { db } = require('../database');
+import jwt from 'jsonwebtoken';
+import { db } from '../api/database.js'; // Note: In ESM, extensions are often required
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key';
 
 // Authenticate user token
-const authenticate = (req, res, next) => {
+export const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -39,7 +39,7 @@ const authenticate = (req, res, next) => {
 };
 
 // Check specific roles
-const authorize = (roles = []) => {
+export const authorize = (roles = []) => {
     if (typeof roles === 'string') {
         roles = [roles];
     }
@@ -51,4 +51,4 @@ const authorize = (roles = []) => {
     };
 };
 
-module.exports = { authenticate, authorize, JWT_SECRET };
+export { JWT_SECRET };
