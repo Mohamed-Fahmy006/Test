@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import process from 'process';
-import { db } from '../api/database.js';
+import { db } from '../database.js';
  // Note: In ESM, extensions are often required
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key';
