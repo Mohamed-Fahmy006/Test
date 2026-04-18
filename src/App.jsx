@@ -5,22 +5,44 @@ import './index.css';
 const API_URL = '/api';
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem('booking_token') || '');
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('booking_user')) || null);
+  const [token, setToken] = useState(() => {
+    try {
+      return localStorage.getItem('booking_token') || '';
+    } catch (e) {
+      console.warn('Storage blocked:', e);
+      return '';
+    }
+  });
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('booking_user')) || null;
+    } catch (e) {
+      console.warn('Storage blocked:', e);
+      return null;
+    }
+  });
   const [metadata, setMetadata] = useState({ rooms: [], slots: [] });
 
   const login = (userData) => {
     setToken(userData.token);
     setUser({ role: userData.role, name: userData.fullName });
-    localStorage.setItem('booking_token', userData.token);
-    localStorage.setItem('booking_user', JSON.stringify({ role: userData.role, name: userData.fullName }));
+    try {
+      localStorage.setItem('booking_token', userData.token);
+      localStorage.setItem('booking_user', JSON.stringify({ role: userData.role, name: userData.fullName }));
+    } catch (e) {
+      console.warn('Could not save to storage:', e);
+    }
   };
 
   const logout = () => {
     setToken('');
     setUser(null);
-    localStorage.removeItem('booking_token');
-    localStorage.removeItem('booking_user');
+    try {
+      localStorage.removeItem('booking_token');
+      localStorage.removeItem('booking_user');
+    } catch (e) {
+      console.warn('Could not clear storage:', e);
+    }
   };
 
   const getErrorMessage = (err) => {
