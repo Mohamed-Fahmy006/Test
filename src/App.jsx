@@ -23,6 +23,24 @@ export default function App() {
     localStorage.removeItem('booking_user');
   };
 
+  const getErrorMessage = (err) => {
+    if (typeof err === 'string') return err;
+    if (err?.response?.data?.error) {
+      return typeof err.response.data.error === 'string' 
+        ? err.response.data.error 
+        : JSON.stringify(err.response.data.error);
+    }
+    if (err?.response?.data?.details) {
+      return typeof err.response.data.details === 'string'
+        ? err.response.data.details
+        : JSON.stringify(err.response.data.details);
+    }
+    if (err?.message) {
+      return typeof err.message === 'string' ? err.message : JSON.stringify(err.message);
+    }
+    return 'حدث خطأ غير معروف';
+  };
+
   useEffect(() => {
     if (token) {
       axios.get(`${API_URL}/metadata`, { headers: { Authorization: `Bearer ${token}` } })
@@ -34,15 +52,15 @@ export default function App() {
   }, [token]);
 
   if (!token || !user) {
-    return <LoginScreen onLogin={login} />;
+    return <LoginScreen onLogin={login} getErrorMessage={getErrorMessage} />;
   }
 
   return (
-    <MainApp user={user} logout={logout} metadata={metadata} token={token} />
+    <MainApp user={user} logout={logout} metadata={metadata} token={token} getErrorMessage={getErrorMessage} />
   );
 }
 
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, getErrorMessage }) {
   const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -53,7 +71,7 @@ function LoginScreen({ onLogin }) {
       const res = await axios.post(`${API_URL}/auth/login`, { employee_id: employeeId, password });
       onLogin(res.data);
     } catch (err) {
-      setError(err.response?.data?.error || 'فشل تسجيل الدخول');
+      setError(getErrorMessage(err));
     }
   };
 
@@ -103,7 +121,7 @@ function LoginScreen({ onLogin }) {
   );
 }
 
-function MainApp({ user, logout, metadata, token }) {
+function MainApp({ user, logout, metadata, token, getErrorMessage }) {
   const isEmployeeOrSec = ['Employee', 'Secretary'].includes(user.role);
   const isAdminOrMngr = ['Admin', 'Branch Manager'].includes(user.role);
   
@@ -161,18 +179,18 @@ function MainApp({ user, logout, metadata, token }) {
         </header>
 
         <div className="content-body">
-          {activeTab === 'booking' && <BlindBookingForm metadata={metadata} token={token} role={user.role} />}
+          {activeTab === 'booking' && <BlindBookingForm metadata={metadata} token={token} role={user.role} getErrorMessage={getErrorMessage} />}
           {activeTab === 'my-requests' && <MyRequests token={token} />}
           {activeTab === 'dashboard' && <MorningReport token={token} />}
-          {activeTab === 'calendar' && <AdminCalendar token={token} userRole={user.role} />}
-          {activeTab === 'delegate' && <DelegationForm token={token} />}
+          {activeTab === 'calendar' && <AdminCalendar token={token} userRole={user.role} getErrorMessage={getErrorMessage} />}
+          {activeTab === 'delegate' && <DelegationForm token={token} getErrorMessage={getErrorMessage} />}
         </div>
       </main>
     </div>
   );
 }
 
-function BlindBookingForm({ metadata, token, role }) {
+function BlindBookingForm({ metadata, token, role, getErrorMessage }) {
   const [form, setForm] = useState({
     room_type: role === 'Secretary' ? 'Multi-purpose' : '',
     room_id: '',
@@ -202,7 +220,7 @@ function BlindBookingForm({ metadata, token, role }) {
       });
       setMsg(`تم الإرسال بنجاح! رقم الحجز: ${res.data.bookingId}`);
     } catch(err) {
-      setMsg(`خطأ: ${err.response?.data?.error || 'حدث خطأ غير معروف'}`);
+      setMsg(`خطأ: ${getErrorMessage(err)}`);
     }
   };
 
@@ -369,7 +387,7 @@ function MorningReport({ token }) {
   );
 }
 
-function AdminCalendar({ token, userRole }) {
+function AdminCalendar({ token, userRole, getErrorMessage }) {
   const [bookings, setBookings] = useState([]);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [activeBooking, setActiveBooking] = useState(null);
@@ -391,7 +409,7 @@ function AdminCalendar({ token, userRole }) {
       setRejectModalOpen(false);
       fetchBookings();
     } catch(err) {
-      alert(`خطأ: ${err.response?.data?.error || 'فشل التحديث'}`);
+      alert(`خطأ: ${getErrorMessage(err)}`);
     }
   };
 
@@ -463,7 +481,7 @@ function AdminCalendar({ token, userRole }) {
   );
 }
 
-function DelegationForm({ token }) {
+function DelegationForm({ token, getErrorMessage }) {
   const [form, setForm] = useState({ original_user: '', substitute_user: '', start_date: '', end_date: '' });
   const [msg, setMsg] = useState('');
 
@@ -477,7 +495,7 @@ function DelegationForm({ token }) {
       setMsg('تم إنشاء التفويض بنجاح للموظف البديل.');
       setForm({ original_user: '', substitute_user: '', start_date: '', end_date: '' });
     } catch(err) {
-      setMsg(`خطأ: ${err.response?.data?.error || 'حدث خطأ'}`);
+      setMsg(`خطأ: ${getErrorMessage(err)}`);
     }
   };
 

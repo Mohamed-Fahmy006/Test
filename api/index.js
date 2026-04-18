@@ -5,6 +5,9 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import process from 'process';
 import { parseISO, differenceInHours, isBefore } from 'date-fns';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 import { db, initDb } from './database.js';
 import { authenticate, authorize, JWT_SECRET } from './middleware/auth.js';
@@ -18,8 +21,12 @@ app.use(async (req, res, next) => {
         await initDb();
         next();
     } catch (err) {
-        console.error('Failed to initialize database:', err);
-        res.status(500).json({ error: 'Database initialization failed' });
+        console.error('DATABASE_INIT_ERROR:', err);
+        res.status(500).json({ 
+            error: 'Database initialization failed', 
+            details: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
+        });
     }
 });
 
@@ -27,30 +34,39 @@ app.use(async (req, res, next) => {
 app.post('/api/auth/login', (req, res) => {
     const { employee_id, password } = req.body;
     console.log(`Login attempt for ID: ${employee_id}`);
-    
+
+    if (!employee_id || !password) {
+        return res.status(400).json({ error: 'Employee ID and password are required' });
+    }
+
     db.get(`SELECT u.*, r.Role_Name FROM Users u JOIN Roles r ON u.Role_ID = r.Role_ID WHERE u.User_ID = ?`, [employee_id], async (err, user) => {
         if (err) {
-            console.error('DB Login Error:', err);
-            return res.status(500).json({ error: 'Database error' });
+            console.error('LOGIN_DB_ERROR:', err);
+            return res.status(500).json({ error: 'Database error', details: err.message });
         }
         if (!user) {
             console.log(`User not found: ${employee_id}`);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        const isMatch = await bcrypt.compare(password, user.Password_Hash);
-        if (!isMatch) {
-            console.log(`Password mismatch for ID: ${employee_id}`);
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
+        try {
+            const isMatch = await bcrypt.compare(password, user.Password_Hash);
+            if (!isMatch) {
+                console.log(`Password mismatch for ID: ${employee_id}`);
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
 
-        console.log(`Login successful: ${user.Full_Name} (${user.Role_Name})`);
-        const token = jwt.sign(
-            { userId: user.User_ID, role: user.Role_Name, override: user.View_Available_Override },
-            JWT_SECRET,
-            { expiresIn: '8h' }
-        );
-        res.json({ token, role: user.Role_Name, fullName: user.Full_Name });
+            console.log(`Login successful: ${user.Full_Name} (${user.Role_Name})`);
+            const token = jwt.sign(
+                { userId: user.User_ID, role: user.Role_Name, override: user.View_Available_Override },
+                JWT_SECRET,
+                { expiresIn: '8h' }
+            );
+            res.json({ token, role: user.Role_Name, fullName: user.Full_Name });
+        } catch (bcryptErr) {
+            console.error('BCRYPT_ERROR:', bcryptErr);
+            res.status(500).json({ error: 'Authentication error', details: bcryptErr.message });
+        }
     });
 });
 

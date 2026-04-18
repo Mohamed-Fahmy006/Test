@@ -13,11 +13,17 @@ const env = process.env || {};
 
 const dbPath = env.VERCEL ? '/tmp/booking_system.db' : path.resolve(__dirname, 'booking_system.db');
 console.log('Database Path:', dbPath);
-const db = new sqlite3Verbose.Database(dbPath);
+const db = new sqlite3Verbose.Database(dbPath, (err) => {
+    if (err) console.error('DATABASE_CONNECTION_ERROR:', err);
+    else console.log('Connected to SQLite database');
+});
 
 const runObj = (sql, params = []) => new Promise((resolve, reject) => {
     db.run(sql, params, function(err) { 
-        if(err) reject(err); else resolve(this); 
+        if(err) {
+            console.error('SQL_RUN_ERROR:', sql, err);
+            reject(err); 
+        } else resolve(this); 
     });
 });
 
@@ -25,6 +31,7 @@ let initialized = false;
 let initPromise = null;
 
 const doInit = async () => {
+    console.log('Starting database initialization...');
     await runObj(`CREATE TABLE IF NOT EXISTS Roles (Role_ID INTEGER PRIMARY KEY AUTOINCREMENT, Role_Name TEXT UNIQUE NOT NULL)`);
     await runObj(`CREATE TABLE IF NOT EXISTS Users (User_ID INTEGER PRIMARY KEY, Full_Name TEXT NOT NULL, Password_Hash TEXT NOT NULL, Role_ID INTEGER, View_Available_Override BOOLEAN DEFAULT 0, FOREIGN KEY (Role_ID) REFERENCES Roles(Role_ID))`);
     await runObj(`CREATE TABLE IF NOT EXISTS Rooms (Room_ID INTEGER PRIMARY KEY AUTOINCREMENT, Room_Name TEXT NOT NULL, Room_Type TEXT NOT NULL CHECK(Room_Type IN ('Lecture Hall', 'Multi-purpose')), Capacity INTEGER NOT NULL)`);
