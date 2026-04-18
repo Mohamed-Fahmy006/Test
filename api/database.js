@@ -1,7 +1,7 @@
 import sqlite3 from 'sqlite3';
 const sqlite3Verbose = sqlite3.verbose();
 import path from 'path';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { fileURLToPath } from 'url';
 import process from 'process'; // Explicit import to fix 'process is not defined'
 

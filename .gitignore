@@ -24,3 +24,4 @@ booking_system.db
 *.njsproj
 *.sln
 *.sw?
+.env

@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import process from 'process';
 import { parseISO, differenceInHours, isBefore } from 'date-fns';
@@ -213,6 +213,16 @@ app.get('/api/metadata', authenticate, (req, res) => {
             if (err) return res.status(500).json({ error: 'Database error' });
             res.json({ rooms, slots });
         });
+    });
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error('UNHANDLED_ERROR:', err);
+    res.status(500).json({ 
+        error: 'Internal server error', 
+        details: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
 });
 
