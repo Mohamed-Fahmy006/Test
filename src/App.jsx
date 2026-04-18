@@ -110,7 +110,7 @@ function MainApp({ user, logout, metadata, token }) {
   const [activeTab, setActiveTab] = useState(isAdminOrMngr ? 'dashboard' : 'booking');
 
   return (
-    <div className="screen active" style={{ display: 'grid' }}>
+    <div id="app-screen" className="active">
       <aside className="sidebar glass-panel">
         <div className="sidebar-header">
           <div className="logo-small"><i className="fa-solid fa-building-columns"></i></div>

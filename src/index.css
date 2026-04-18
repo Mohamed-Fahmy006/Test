@@ -47,28 +47,24 @@ body {
     display: flex;
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes float {
-    0% { transform: translateY(0px) scale(1); }
-    50% { transform: translateY(-20px) scale(1.05); }
-    100% { transform: translateY(0px) scale(1); }
-}
-
-/* Layout */
 #app-screen {
     display: none;
     padding: 1.5rem;
     gap: 1.5rem;
+    min-height: 100vh;
 }
 
 #app-screen.active {
     display: grid;
     grid-template-columns: 280px 1fr;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+    height: calc(100vh - 3rem);
 }
 
 /* Login Screen */
