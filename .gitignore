@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+api/*.db
+booking_system.db
 
 # Editor directories and files
 .vscode/*

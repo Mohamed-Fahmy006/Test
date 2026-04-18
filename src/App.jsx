@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './index.css';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = '/api';
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('booking_token') || '');
